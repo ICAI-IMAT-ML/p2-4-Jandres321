@@ -78,7 +78,7 @@ class LinearRegressor:
 
     def fit_gradient_descent(self, X, y, learning_rate=0.01, iterations=1000):
         """
-        Fit the model using either normal equation or gradient descent.
+        Fit the model using gradient descent.
 
         Args:
             X (np.ndarray): Independent variable data (2D array), with bias.
@@ -92,24 +92,25 @@ class LinearRegressor:
 
         # Initialize the parameters to very small values (close to 0)
         m = len(y)
-        self.coefficients = (
-            np.random.rand(X.shape[1] - 1) * 0.01
-        )  # Small random numbers
+        self.coefficients = np.random.rand(X.shape[1] - 1) * 0.01  # Small random numbers
         self.intercept = np.random.rand() * 0.01
 
-        # Implement gradient descent (TODO)
+        # Implement gradient descent
         for epoch in range(iterations):
-            predictions = None
+            predictions = X.dot(np.insert(self.coefficients, 0, self.intercept))
             error = predictions - y
 
-            # TODO: Write the gradient values and the updates for the paramenters
-            gradient = None
-            self.intercept -= None
-            self.coefficients -= None
+            # Calculate the gradient values
+            gradient_intercept = (2 / m) * np.sum(error)
+            gradient_coefficients = (2 / m) * X[:, 1:].T.dot(error)
 
-            # TODO: Calculate and print the loss every 10 epochs
+            # Update the parameters
+            self.intercept -= learning_rate * gradient_intercept
+            self.coefficients -= learning_rate * gradient_coefficients
+
+            # Calculate and print the loss every 1000 epochs
             if epoch % 1000 == 0:
-                mse = None
+                mse = np.mean(error ** 2)
                 print(f"Epoch {epoch}: MSE = {mse}")
 
     def predict(self, X):
@@ -127,12 +128,18 @@ class LinearRegressor:
             ValueError: If the model is not yet fitted.
         """
 
-        # Paste your code from last week
-
         if self.coefficients is None or self.intercept is None:
             raise ValueError("Model is not yet fitted")
 
-        return None
+        if np.ndim(X) == 1:
+            # Predict when X is only one variable
+            predictions = self.intercept + self.coefficients[0] * X
+        else:
+            # Predict when X is more than one variable
+            X_b = np.c_[np.ones((X.shape[0], 1)), X]
+            predictions = X_b.dot(np.r_[self.intercept, self.coefficients])
+
+        return predictions
 
 
 def evaluate_regression(y_true, y_pred):
@@ -148,16 +155,15 @@ def evaluate_regression(y_true, y_pred):
     """
 
     # R^2 Score
-    # TODO
-    r_squared = None
+    ss_res = np.sum((y_true - y_pred) * (y_true - y_pred))
+    ss_tot = np.sum((y_true - np.mean(y_true)) * (y_true - np.mean(y_true)))
+    r_squared = 1 - (ss_res / ss_tot)
 
     # Root Mean Squared Error
-    # TODO
-    rmse = None
+    rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
 
     # Mean Absolute Error
-    # TODO
-    mae = None
+    mae = np.mean(np.abs(y_true - y_pred))
 
     return {"R2": r_squared, "RMSE": rmse, "MAE": mae}
 
