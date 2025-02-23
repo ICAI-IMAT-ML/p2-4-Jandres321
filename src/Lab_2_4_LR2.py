@@ -68,7 +68,7 @@ class LinearRegressor:
         X_b = np.c_[np.ones((X.shape[0], 1)), X]
 
         # Calculate the best fit line using the normal equation
-        theta_best = np.linalg.inv(X_b.T.dot(X_b)).dot(X_b.T).dot(y)
+        theta_best = np.linalg.pinv(X_b.T.dot(X_b)).dot(X_b.T).dot(y)
 
         self.intercept = theta_best[0]
         self.coefficients = theta_best[1:]
