@@ -72,9 +72,6 @@ class LinearRegressor:
 
         self.intercept = theta_best[0]
         self.coefficients = theta_best[1:]
-        # Store the intercept and the coefficients of the model
-        self.intercept = None
-        self.coefficients = None
 
     def fit_gradient_descent(self, X, y, learning_rate=0.01, iterations=1000):
         """
