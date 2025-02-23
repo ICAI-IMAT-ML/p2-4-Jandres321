@@ -79,38 +79,42 @@ class LinearRegressor:
     def fit_gradient_descent(self, X, y, learning_rate=0.01, iterations=1000):
         """
         Fit the model using gradient descent.
-
+ 
         Args:
             X (np.ndarray): Independent variable data (2D array), with bias.
             y (np.ndarray): Dependent variable data (1D array).
             learning_rate (float): Learning rate for gradient descent.
             iterations (int): Number of iterations for gradient descent.
-
+ 
         Returns:
             None: Modifies the model's coefficients and intercept in-place.
         """
-
+ 
         # Initialize the parameters to very small values (close to 0)
         m = len(y)
-        self.coefficients = np.random.rand(X.shape[1] - 1) * 0.01  # Small random numbers
+        self.coefficients = (
+            np.random.rand(X.shape[1] - 1) * 0.01
+        )  # Small random numbers
+        # Antes había np.random.rand(X.shape[1] - 1) * 0.01
         self.intercept = np.random.rand() * 0.01
-
+ 
         # Implement gradient descent
         for epoch in range(iterations):
-            predictions = X.dot(np.insert(self.coefficients, 0, self.intercept))
+            predictions = self.predict(X[:, 1:])
             error = predictions - y
-
-            # Calculate the gradient values
-            gradient_intercept = (2 / m) * np.sum(error)
-            gradient_coefficients = (2 / m) * X[:, 1:].T.dot(error)
-
-            # Update the parameters
-            self.intercept -= learning_rate * gradient_intercept
-            self.coefficients -= learning_rate * gradient_coefficients
-
-            # Calculate and print the loss every 1000 epochs
-            if epoch % 1000 == 0:
-                mse = np.mean(error ** 2)
+ 
+            gradient_coefficients = []
+            for j in range(1,X.ndim):
+                partial_gradient = (2 * learning_rate / m) * np.sum(np.dot((X.T)**j, error))
+                gradient_coefficients.append(partial_gradient)
+           
+            gradient_intercept = (2 * learning_rate / m) * np.sum(error)
+            self.intercept -= gradient_intercept
+            self.coefficients -=  gradient_coefficients
+ 
+            # Calculate and print the loss every 10 epochs
+            if epoch % 10 == 0:
+                mse = np.mean(error**2)
                 print(f"Epoch {epoch}: MSE = {mse}")
 
     def predict(self, X):
