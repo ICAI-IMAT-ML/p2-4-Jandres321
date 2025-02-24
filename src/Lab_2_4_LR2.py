@@ -27,7 +27,7 @@ class LinearRegressor:
             X (np.ndarray): Independent variable data (2D array).
             y (np.ndarray): Dependent variable data (1D array).
             method (str): method to train linear regression coefficients.
-                          It may be "least_squares" or "gradient_descent".
+                        It may be "least_squares" or "gradient_descent".
             learning_rate (float): Learning rate for gradient descent.
             iterations (int): Number of iterations for gradient descent.
 
@@ -41,14 +41,10 @@ class LinearRegressor:
         if np.ndim(X) == 1:
             X = X.reshape(-1, 1)
 
-        X_with_bias = np.insert(
-            X, 0, 1, axis=1
-        )  # Adding a column of ones for intercept
-
         if method == "least_squares":
-            self.fit_multiple(X_with_bias, y)
+            self.fit_multiple(X, y)
         elif method == "gradient_descent":
-            self.fit_gradient_descent(X_with_bias, y, learning_rate, iterations)
+            self.fit_gradient_descent(X, y, learning_rate, iterations)
 
     def fit_multiple(self, X, y):
         """
@@ -58,7 +54,7 @@ class LinearRegressor:
         multiple linear regression.
 
         Args:
-            X (np.ndarray): Independent variable data (2D array), with bias.
+            X (np.ndarray): Independent variable data (2D array).
             y (np.ndarray): Dependent variable data (1D array).
 
         Returns:
@@ -122,7 +118,6 @@ class LinearRegressor:
 
         Args:
             X (np.ndarray): Independent variable data (1D or 2D array).
-            fit (bool): Flag to indicate if fit was done.
 
         Returns:
             np.ndarray: Predicted values of the dependent variable.
@@ -130,7 +125,6 @@ class LinearRegressor:
         Raises:
             ValueError: If the model is not yet fitted.
         """
-
         if self.coefficients is None or self.intercept is None:
             raise ValueError("Model is not yet fitted")
 
