@@ -178,25 +178,18 @@ def one_hot_encode(X, categorical_indices, drop_first=False):
     Returns:
         np.ndarray: Transformed array with one-hot encoded columns.
     """
-    X_transformed = X.copy()
-    for index in sorted(categorical_indices, reverse=True):
-        # Extract the categorical column
-        categorical_column = X_transformed[:, index]
-
-        # Find the unique categories (works with strings)
-        unique_values = np.unique(categorical_column)
-
-        # Create a one-hot encoded matrix (np.array) for the current categorical column
-        one_hot = np.zeros((X_transformed.shape[0], len(unique_values)))
-        for i, unique_value in enumerate(unique_values):
-            one_hot[:, i] = (categorical_column == unique_value).astype(float)
-
-        # Optionally drop the first level of one-hot encoding
-        if drop_first:
-            one_hot = one_hot[:, 1:]
-
-        # Delete the original categorical column from X_transformed and insert new one-hot encoded columns
-        X_transformed = np.delete(X_transformed, index, axis=1)
-        X_transformed = np.concatenate((one_hot, X_transformed), axis=1)
-
-    return X_transformed
+    X_transformed = []
+    for i in range(X.shape[1]):
+        if i in categorical_indices:
+            # Get unique categories
+            categories = np.unique(X[:, i])
+            if drop_first:
+                categories = categories[1:]  # Drop the first category to avoid multicollinearity
+            # Create one-hot encoded columns
+            for category in categories:
+                one_hot_column = (X[:, i] == category).astype(float)
+                X_transformed.append(one_hot_column)
+        else:
+            X_transformed.append(X[:, i].astype(float))
+    
+    return np.column_stack(X_transformed)
