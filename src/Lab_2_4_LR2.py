@@ -88,8 +88,10 @@ class LinearRegressor:
         self.coefficients = (
             np.random.rand(X.shape[1] - 1) * 0.01
         )  # Small random numbers
-        # Antes había np.random.rand(X.shape[1] - 1) * 0.01
         self.intercept = np.random.rand() * 0.01
+
+        # Store the history of coefficients and intercept
+        history = {"intercept": [], "coefficients": []}
 
         # Implement gradient descent
         for epoch in range(iterations):
@@ -107,10 +109,52 @@ class LinearRegressor:
             self.intercept -= gradient_intercept
             self.coefficients -= gradient_coefficients
 
+            # Store the current state of the parameters
+            history["intercept"].append(self.intercept)
+            history["coefficients"].append(self.coefficients.copy())
+
             # Calculate and print the loss every 10 epochs
             if epoch % 10 == 0:
                 mse = np.mean(error**2)
                 print(f"Epoch {epoch}: MSE = {mse}")
+                if epoch == 0:
+                    training_history = {"epoch": [], "mse": []}
+                training_history["epoch"].append(epoch)
+                training_history["mse"].append(mse)
+
+        # Plot training history
+        plt.figure(figsize=(10, 6))
+        plt.plot(training_history["epoch"], training_history["mse"], label="MSE", marker='o', markersize=4, markeredgewidth=1, markeredgecolor='black', color='purple')
+        plt.xlabel("Epoch")
+        plt.ylabel("Mean Squared Error")
+        plt.title("Training History")
+        plt.legend()
+        plt.show()
+
+        # Plot the parameter updates with better separation
+        num_coefficients = len(history["coefficients"][0])
+        plt.figure(figsize=(14, 6))
+
+        # Plot intercept updates
+        plt.subplot(1, num_coefficients + 1, 1)
+        plt.plot(history["intercept"], label="Intercept", color='blue')
+        plt.xlabel("Iteration")
+        plt.ylabel("Value")
+        plt.title("Intercept Updates")
+        plt.legend()
+
+        # Plot each coefficient in separate subplots
+        colors = plt.cm.viridis(np.linspace(0, 1, num_coefficients))
+        for i in range(num_coefficients):
+            plt.subplot(1, num_coefficients + 1, i + 2)
+            plt.plot([coef[i] for coef in history["coefficients"]], label=f"Coefficient {i+1}", color=colors[i])
+            plt.xlabel("Iteration")
+            plt.ylabel("Value")
+            plt.title(f"Coefficient {i+1} Updates")
+            plt.legend()
+
+        plt.tight_layout()
+        plt.show()
 
     def predict(self, X):
         """
@@ -184,12 +228,14 @@ def one_hot_encode(X, categorical_indices, drop_first=False):
             # Get unique categories
             categories = np.unique(X[:, i])
             if drop_first:
-                categories = categories[1:]  # Drop the first category to avoid multicollinearity
+                categories = categories[
+                    1:
+                ]  # Drop the first category to avoid multicollinearity
             # Create one-hot encoded columns
             for category in categories:
                 one_hot_column = (X[:, i] == category).astype(float)
                 X_transformed.append(one_hot_column)
         else:
             X_transformed.append(X[:, i].astype(float))
-    
+
     return np.column_stack(X_transformed)
