@@ -84,10 +84,8 @@ class LinearRegressor:
         """
 
         # Initialize the parameters to very small values (close to 0)
-        m = len(y)
-        self.coefficients = (
-            np.random.rand(X.shape[1] - 1) * 0.01
-        )  # Small random numbers
+        m, n = X.shape
+        self.coefficients = np.random.rand(n) * 0.01  # Small random numbers
         self.intercept = np.random.rand() * 0.01
 
         # Store the history of coefficients and intercept
@@ -95,17 +93,12 @@ class LinearRegressor:
 
         # Implement gradient descent
         for epoch in range(iterations):
-            predictions = self.predict(X[:, 1:])
+            predictions = self.predict(X)
             error = predictions - y
 
-            gradient_coefficients = []
-            for j in range(1, X.ndim):
-                partial_gradient = (2 * learning_rate / m) * np.sum(
-                    np.dot((X.T) ** j, error)
-                )
-                gradient_coefficients.append(partial_gradient)
-
+            gradient_coefficients = (2 * learning_rate / m) * X.T.dot(error)
             gradient_intercept = (2 * learning_rate / m) * np.sum(error)
+
             self.intercept -= gradient_intercept
             self.coefficients -= gradient_coefficients
 
@@ -122,9 +115,10 @@ class LinearRegressor:
                 training_history["epoch"].append(epoch)
                 training_history["mse"].append(mse)
 
+
         # Plot training history
         plt.figure(figsize=(10, 6))
-        plt.plot(training_history["epoch"], training_history["mse"], label="MSE", marker='o', markersize=4, markeredgewidth=1, markeredgecolor='black', color='purple')
+        plt.plot(training_history["epoch"], training_history["mse"], label="MSE", color='purple')
         plt.xlabel("Epoch")
         plt.ylabel("Mean Squared Error")
         plt.title("Training History")
@@ -133,28 +127,25 @@ class LinearRegressor:
 
         # Plot the parameter updates with better separation
         num_coefficients = len(history["coefficients"][0])
-        plt.figure(figsize=(14, 6))
 
         # Plot intercept updates
-        plt.subplot(1, num_coefficients + 1, 1)
+        plt.figure(figsize=(10, 6))
         plt.plot(history["intercept"], label="Intercept", color='blue')
         plt.xlabel("Iteration")
         plt.ylabel("Value")
         plt.title("Intercept Updates")
         plt.legend()
 
-        # Plot each coefficient in separate subplots
+        # Plot each coefficient in separate plots
         colors = plt.cm.viridis(np.linspace(0, 1, num_coefficients))
         for i in range(num_coefficients):
-            plt.subplot(1, num_coefficients + 1, i + 2)
+            plt.figure(figsize=(10, 6))
             plt.plot([coef[i] for coef in history["coefficients"]], label=f"Coefficient {i+1}", color=colors[i])
             plt.xlabel("Iteration")
             plt.ylabel("Value")
             plt.title(f"Coefficient {i+1} Updates")
             plt.legend()
-
-        plt.tight_layout()
-        plt.show()
+            plt.show()
 
     def predict(self, X):
         """
